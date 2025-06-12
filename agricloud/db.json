@@ -1,0 +1,182 @@
+{
+    "user": [{
+            "id": 1,
+            "name": "Ahmad Rizky",
+            "email": "rizky@example.com",
+            "phone_number": "081234567890",
+            "role": "admin",
+            "profile_photo_url": "storage/profile_photos/ahmad.jpg",
+            "created_at": "2024-05-01T10:15:00",
+            "updated_at": "2024-06-01T12:00:00"
+        },
+        {
+            "id": 2,
+            "name": "Bella Kartika",
+            "email": "bella@example.com",
+            "phone_number": "082112345678",
+            "role": "farmer",
+            "profile_photo_url": null,
+            "created_at": "2024-05-10T08:30:00",
+            "updated_at": "2024-06-05T09:45:00"
+        }
+    ],
+    "farmerwarehouse": [{
+            "id": 1,
+            "name": "Gudang Sayur Makmur",
+            "userId": 2,
+            "photos": [
+                "storage/warehouses/gudang1.jpg",
+                "storage/warehouses/gudang1_belakang.jpg"
+            ],
+            "location_url": "https://maps.app.goo.gl/exampleGudang1",
+            "created_at": "2024-06-15T08:00:00",
+            "updated_at": "2024-06-25T09:00:00"
+        },
+        {
+            "id": 2,
+            "name": "Lumbung Padi Nusantara",
+            "userId": 1,
+            "photos": ["storage/warehouses/lumbung1.jpg"],
+            "location_url": "https://maps.app.goo.gl/exampleGudang2",
+            "created_at": "2024-06-20T10:30:00",
+            "updated_at": "2024-07-01T11:45:00"
+        }
+    ],
+    "field": [{
+            "id": 1,
+            "name": "Lahan Kangkung A1",
+            "warehouseId": 1,
+            "location_url": "https://maps.app.goo.gl/exampleGudang1",
+            "latitude": -6.2,
+            "longitude": 106.816666,
+            "custom_polygon": [
+                { "lat": -6.2001, "lng": 106.8167 },
+                { "lat": -6.2002, "lng": 106.8168 },
+                { "lat": -6.2000, "lng": 106.8169 },
+                { "lat": -6.1999, "lng": 106.8166 }
+            ],
+            "area": 250.5,
+            "created_at": "2024-07-01T08:00:00",
+            "updated_at": "2024-07-10T12:00:00"
+        },
+        {
+            "id": 2,
+            "name": "Lahan Bayam B2",
+            "warehouseId": 2,
+            "location_url": "https://maps.app.goo.gl/exampleGudang2",
+            "latitude": -7.25,
+            "longitude": 112.75,
+            "custom_polygon": [],
+            "area": 100,
+            "created_at": "2024-07-05T09:30:00",
+            "updated_at": "2024-07-12T14:15:00"
+        },
+        {
+            "id": 3,
+            "name": "Lahan Cabai C3",
+            "warehouseId": 3,
+            "location_url": "https://maps.app.goo.gl/exampleGudang3",
+            "latitude": -6.9,
+            "longitude": 107.6,
+            "custom_polygon": [
+                { "lat": -6.9001, "lng": 107.6001 },
+                { "lat": -6.9002, "lng": 107.6002 },
+                { "lat": -6.8999, "lng": 107.6003 }
+            ],
+            "area": 150.75,
+            "created_at": "2024-07-08T07:45:00",
+            "updated_at": "2024-07-18T16:20:00"
+        }
+    ],
+    "cycle": [{
+            "id": 1,
+            "name": "Bayam Organik 2024",
+            "description": "Siklus tanam bayam organik dengan varietas unggul.",
+            "fieldId": 2,
+            "field_name": "Lahan pak bambang",
+            "location_url": "https://maps.app.goo.gl/lokasiLahan",
+            "current_stage_id": 5,
+            "created_at": "2024-07-01T08:00:00",
+            "updated_at": "2024-07-10T12:00:00"
+        },
+        {
+            "id": 2,
+            "name": "Cabai Merah Mini",
+            "description": "Tanaman cabai merah cepat panen.",
+            "fieldId": 1,
+            "field_name": "Lahan pak nonok",
+            "location_url": "https://maps.app.goo.gl/lahanCabai",
+            "current_stage_id": 9,
+            "created_at": "2024-06-01T07:30:00",
+            "updated_at": "2024-06-26T10:15:00"
+        },
+        {
+            "id": 3,
+            "name": "Selada Air",
+            "description": "Varietas tahan hama, cocok untuk hidroponik.",
+            "fieldId": 3,
+            "field_name": "Lahan hidroponik",
+            "location_url": "https://maps.app.goo.gl/seladaair",
+            "current_stage_id": null,
+            "created_at": "2024-07-10T09:00:00",
+            "updated_at": "2024-07-10T09:00:00"
+        }
+    ],
+    "stages": [{
+            "id": 4,
+            "cycleId": 1,
+            "name": "Perkecambahan",
+            "description": "Benih mulai tumbuh.",
+            "start_date": "2024-07-01",
+            "end_date": "2024-07-05"
+        },
+        {
+            "id": 5,
+            "cycleId": 1,
+            "name": "Vegetatif",
+            "description": "Pertumbuhan daun dan batang aktif.",
+            "start_date": "2024-07-10",
+            "end_date": "2024-07-20"
+        },
+        {
+            "id": 6,
+            "cycleId": 1,
+            "name": "Panen",
+            "description": "Siap panen.",
+            "start_date": "2024-07-21",
+            "end_date": "2024-07-22"
+        },
+        {
+            "id": 7,
+            "cycleId": 2,
+            "name": "Penyemaian",
+            "description": "Penanaman benih.",
+            "start_date": "2024-06-01",
+            "end_date": "2024-06-05"
+        },
+        {
+            "id": 8,
+            "cycleId": 2,
+            "name": "Vegetatif",
+            "description": "Pertumbuhan daun.",
+            "start_date": "2024-06-10",
+            "end_date": "2024-06-20"
+        },
+        {
+            "id": 9,
+            "cycleId": 2,
+            "name": "Berbunga",
+            "description": "Mulai muncul bunga.",
+            "start_date": "2024-06-25",
+            "end_date": "2024-07-05"
+        },
+        {
+            "id": 10,
+            "cycleId": 3,
+            "name": "Penyemaian",
+            "description": "Tahap awal benih tumbuh.",
+            "start_date": "2024-07-15",
+            "end_date": "2024-07-20"
+        }
+    ]
+}
