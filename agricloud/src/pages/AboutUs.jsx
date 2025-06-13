@@ -6,7 +6,7 @@ import logo from '../assets/logoagri.png';
 import layananImg from '../assets/petanigarap.png';
 import joinImg from '../assets/bergabung.png';
 import team1 from '../assets/max.png';
-import team2 from '../assets/max.png';
+import team2 from '../assets/dira.jpg';
 import team3 from '../assets/max.png';
 import team4 from '../assets/max.png';
 import team5 from '../assets/max.png';

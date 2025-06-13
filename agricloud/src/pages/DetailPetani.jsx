@@ -4,6 +4,9 @@ import axios from 'axios';
 import backgroundImg from '../assets/breadcrumb.png';
 import Navbar from '../components/Layout/Navbar';
 import Footer from '../components/Layout/Footer';
+import maxProfilePlaceholder from '../assets/max.png';
+import warehousePlaceholder from '../assets/about-big.png';
+
 
 export default function DetailPetani() {
   const { id } = useParams();
@@ -17,33 +20,35 @@ export default function DetailPetani() {
   const [imageModalOpen, setImageModalOpen] = useState(false);
 
   useEffect(() => {
-    const fetchDetail = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+const fetchDetail = async () => {
+  try {
+    setLoading(true);
+    setError(null);
 
-        const [userRes, warehouseRes] = await Promise.all([
-          axios.get('http://localhost:3001/user'),
-          axios.get('http://localhost:3001/farmerwarehouse')
-        ]);
+    const [userRes, warehouseRes] = await Promise.all([
+      axios.get(`http://localhost:3001/user/${id}`),
+      axios.get(`http://localhost:3001/farmerwarehouse`)
+    ]);
 
-        const selectedUser = userRes.data.find(u => u.id === parseInt(id));
-        if (!selectedUser) {
-          setError('Petani tidak ditemukan');
-          return;
-        }
+    const selectedUser = userRes.data;
+    if (!selectedUser) {
+      setError('Petani tidak ditemukan');
+      return;
+    }
 
-        const userWarehouses = warehouseRes.data.filter(w => w.userId === selectedUser.id);
-        
-        setUser(selectedUser);
-        setWarehouses(userWarehouses);
-      } catch (error) {
-        console.error("Gagal mengambil data:", error);
-        setError('Gagal memuat data. Silakan coba lagi.');
-      } finally {
-        setLoading(false);
-      }
-    };
+    const userWarehouses = warehouseRes.data.filter(w => String(w.userId) === String(selectedUser.id));
+
+
+    setUser(selectedUser);
+    setWarehouses(userWarehouses);
+  } catch (error) {
+    console.error("Gagal mengambil data:", error);
+    setError('Gagal memuat data. Silakan coba lagi.');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
     fetchDetail();
   }, [id]);
@@ -163,38 +168,39 @@ export default function DetailPetani() {
                 {/* Profile Image Section */}
                 <div className="position-relative bg-success bg-opacity-10 p-4">
                   <div className="text-center">
-                    <img
-                      src={
-                        user.profile_photo_url
-                          ? `http://localhost:3001/${user.profile_photo_url}`
-                          : "../assets/max.png"
-                      }
-                      alt={user.name}
-                      className="rounded-circle border border-3 border-success shadow-lg cursor-pointer"
-                      style={{ 
-                        width: '200px', 
-                        height: '200px', 
-                        objectFit: 'cover',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease'
-                      }}
-                      onClick={() => openImageModal(
-                        user.profile_photo_url
-                          ? `http://localhost:3001/${user.profile_photo_url}`
-                          : "/default-avatar.png"
-                      )}
-                      onMouseOver={(e) => {
-                        e.target.style.transform = 'scale(1.05)';
-                        e.target.style.boxShadow = '0 8px 25px rgba(34, 139, 34, 0.4)';
-                      }}
-                      onMouseOut={(e) => {
-                        e.target.style.transform = 'scale(1)';
-                        e.target.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)';
-                      }}
-                      onError={(e) => {
-                        e.target.src = "/default-avatar.png";
-                      }}
-                    />
+<img
+  src={
+    user.profile_photo_url
+      ? `http://localhost:3001/${user.profile_photo_url}`
+      : maxProfilePlaceholder
+  }
+  alt={user.name}
+  className="rounded-circle border border-3 border-success shadow-lg cursor-pointer"
+  style={{ 
+    width: '200px', 
+    height: '200px', 
+    objectFit: 'cover',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease'
+  }}
+  onClick={() => openImageModal(
+    user.profile_photo_url
+      ? `http://localhost:3001/${user.profile_photo_url}`
+      : maxProfilePlaceholder
+  )}
+  onMouseOver={(e) => {
+    e.target.style.transform = 'scale(1.05)';
+    e.target.style.boxShadow = '0 8px 25px rgba(34, 139, 34, 0.4)';
+  }}
+  onMouseOut={(e) => {
+    e.target.style.transform = 'scale(1)';
+    e.target.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)';
+  }}
+  onError={(e) => {
+    e.target.src = maxProfilePlaceholder;
+  }}
+/>
+
                     <div className="position-absolute top-0 end-0 m-3">
                       <button 
                         className="btn btn-dark btn-sm rounded-pill"
@@ -276,20 +282,38 @@ export default function DetailPetani() {
                       {/* Warehouse Main Image */}
                       {wh.photos?.length > 0 && (
                         <div className="position-relative">
-                          <img
-                            src={`http://localhost:3001/${wh.photos[0]}`}
-                            alt={wh.name}
-                            className="w-100 cursor-pointer"
-                            style={{ 
-                              height: '200px', 
-                              objectFit: 'cover',
-                              cursor: 'pointer'
-                            }}
-                            onClick={() => openImageModal(`http://localhost:3001/${wh.photos[0]}`)}
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                            }}
-                          />
+<img
+  src={
+    wh.photos?.length > 0
+      ? `http://localhost:3001/${wh.photos[0]}`
+      : warehousePlaceholder
+  }
+  alt={wh.name}
+  className="w-100"
+  style={{
+    height: '250px',
+    objectFit: 'cover',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease'
+  }}
+  onClick={() => openImageModal(
+    wh.photos?.length > 0
+      ? `http://localhost:3001/${wh.photos[0]}`
+      : warehousePlaceholder
+  )}
+  onMouseOver={(e) => {
+    e.target.style.transform = 'scale(1.03)';
+    e.target.style.boxShadow = '0 8px 25px rgba(34, 139, 34, 0.2)';
+  }}
+  onMouseOut={(e) => {
+    e.target.style.transform = 'scale(1)';
+    e.target.style.boxShadow = 'none';
+  }}
+  onError={(e) => {
+    e.target.src = warehousePlaceholder;
+  }}
+/>
+
                           <div className="position-absolute top-0 end-0 m-2">
                             <button 
                               className="btn btn-dark btn-sm rounded-pill"

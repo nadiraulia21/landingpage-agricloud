@@ -3,6 +3,7 @@ import axios from 'axios';
 import backgroundImg from '../assets/breadcrumb.png';
 import Navbar from '../components/Layout/Navbar';
 import Footer from '../components/Layout/Footer';
+import maxProfilePlaceholder from '../assets/max.png'; // Add this line
 import { Link } from 'react-router-dom';
 
 export default function ListPetani() {
@@ -205,29 +206,31 @@ export default function ListPetani() {
                   >
                     <div className="card h-100 shadow-sm border-0 rounded-4 overflow-hidden position-relative">
                       <div className="position-relative">
-                        <img
-                          src={
-                            user.profile_photo_url
-                              ? `http://localhost:3001/${user.profile_photo_url}`
-                              : "/default-avatar.png"
-                          }
-                          alt={user.name}
-                          className="card-img-top"
-                          style={{ 
-                            height: '240px', 
-                            objectFit: 'cover',
-                            transition: 'all 0.3s ease'
-                          }}
-                          onError={(e) => {
-                            e.target.src = "/default-avatar.png";
-                          }}
-                          onMouseOver={(e) => {
-                            e.target.style.transform = 'scale(1.05)';
-                          }}
-                          onMouseOut={(e) => {
-                            e.target.style.transform = 'scale(1)';
-                          }}
-                        />
+                            <img
+      src={
+        user.profile_photo_url && user.profile_photo_url.trim() !== ''
+          ? `http://localhost:3001/${user.profile_photo_url}`
+          : maxProfilePlaceholder
+      }
+      alt={user.name}
+      className="card-img-top"
+      style={{
+        height: '240px',
+        objectFit: 'cover',
+        transition: 'all 0.3s ease'
+      }}
+      onError={(e) => {
+        e.target.onerror = null; // Hindari infinite loop jika fallback juga gagal
+        e.target.src = maxProfilePlaceholder;
+      }}
+      onMouseOver={(e) => {
+        e.target.style.transform = 'scale(1.05)';
+      }}
+      onMouseOut={(e) => {
+        e.target.style.transform = 'scale(1)';
+      }}
+    />
+
                         <div className="position-absolute top-0 end-0 m-3">
                           <div className="badge bg-success rounded-pill px-3 py-2">
                             <i className="bi bi-patch-check me-1"></i>

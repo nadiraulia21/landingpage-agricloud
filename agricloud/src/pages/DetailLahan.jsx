@@ -4,13 +4,15 @@ import axios from 'axios';
 import Navbar from '../components/Layout/Navbar';
 import Footer from '../components/Layout/Footer';
 import backgroundImg from '../assets/breadcrumb.png';
+import warehousePlaceholder from '../assets/about-big.png';
+
 
 export default function DetailLahan() {
-  const { id } = useParams();
+  const { id } = useParams(); // ID of the warehouse from the URL
   const [warehouse, setWarehouse] = useState(null);
-  const [user, setUser] = useState(null);
-  const [fields, setFields] = useState([]);
-  const [cycles, setCycles] = useState([]);
+  const [user, setUser] = useState(null); // The owner (farmer) of this warehouse
+  const [fields, setFields] = useState([]); // Fields associated with this warehouse
+  const [cycles, setCycles] = useState([]); // Cycles associated with these fields
   const [mainImage, setMainImage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -25,43 +27,87 @@ export default function DetailLahan() {
         setLoading(true);
         setError(null);
 
-        const [whRes, userRes, fieldRes, cycleRes] = await Promise.all([
+        // Fetch all necessary data concurrently from your local API endpoints
+        const [whRes, userRes, fieldRes, cycleRes, stagesRes] = await Promise.all([
           axios.get('http://localhost:3001/farmerwarehouse'),
           axios.get('http://localhost:3001/user'),
-          axios.get('http://localhost:3001/field'),
-          axios.get('http://localhost:3001/cycle'),
+          axios.get(`http://localhost:3001/field`),
+          axios.get(`http://localhost:3001/cycle`),
+          axios.get(`http://localhost:3001/stages`) // Added stages data fetch
         ]);
 
-        const selectedWarehouse = whRes.data.find(w => w.id === parseInt(id));
+        // 1. Find the specific warehouse based on the URL ID
+        const selectedWarehouse = whRes.data.find(w => Number(w.id) === Number(id));
+
         if (!selectedWarehouse) {
-          setError('Lahan tidak ditemukan');
-          return;
+          setError('Lahan tidak ditemukan: ID Lahan tidak valid atau tidak ada di database.');
+          return; // Stop execution if warehouse is not found
         }
 
-        const owner = userRes.data.find(u => u.id === selectedWarehouse.userId);
-        const relatedFields = fieldRes.data.filter(f => f.warehouseId === selectedWarehouse.id);
-        const fieldIds = relatedFields.map(f => f.id);
-        const relatedCycles = cycleRes.data.filter(c => fieldIds.includes(c.fieldId));
+        // 2. Find the owner (user) of this specific warehouse
+        const owner = userRes.data.find(u => Number(u.id) === Number(selectedWarehouse.userId));
+        if (!owner) {
+          setError('Data Petani tidak ditemukan: Petani pemilik lahan ini tidak ada di database.');
+          return; // Stop execution if owner is not found
+        }
 
+        // 3. Filter fields that belong to the selected warehouse
+        const relatedFields = fieldRes.data.filter(f => Number(f.warehouseId) === Number(selectedWarehouse.id));
+
+        // 4. Create a map for quick lookup of field names by their ID
+        const fieldNameMap = new Map(relatedFields.map(field => [Number(field.id), field.name]));
+
+        // 5. Filter cycles that belong to the fields of the selected warehouse
+        //    and enrich each cycle with its corresponding field's name and current stage info
+        const stagesMap = new Map(stagesRes.data.map(stage => [Number(stage.id), stage.name]));
+
+        const relatedCycles = cycleRes.data
+          .filter(c => fieldNameMap.has(Number(c.fieldId))) // Only include cycles tied to our related fields
+          .map(c => ({
+            ...c,
+            field_name: fieldNameMap.get(Number(c.fieldId)) || c.field_name || 'Lahan Tidak Diketahui',
+            current_stage_name: c.current_stage_id ? stagesMap.get(Number(c.current_stage_id)) : 'Tidak ada Tahap'
+          }));
+
+        // Set states with the fetched and processed data
         setWarehouse(selectedWarehouse);
-        setUser(owner ?? null);
+        setUser(owner);
         setFields(relatedFields);
         setCycles(relatedCycles);
+        // Set the main image to the first photo available, or null if none
         setMainImage(selectedWarehouse.photos?.[0] ?? null);
+
       } catch (error) {
         console.error('Gagal memuat detail lahan:', error.message);
-        setError('Gagal memuat data. Silakan coba lagi.');
+        // Provide more specific error messages based on the type of error
+        if (axios.isAxiosError(error)) {
+          if (error.response) {
+            // Server responded with a status code outside of 2xx range
+            setError(`Gagal memuat data dari server: ${error.response.status} - ${error.response.statusText}.`);
+            console.error('Response data:', error.response.data);
+          } else if (error.request) {
+            // Request was made but no response was received
+            setError('Tidak ada respons dari server. Pastikan API server berjalan di http://localhost:3001.');
+          } else {
+            // Something else happened in setting up the request
+            setError(`Terjadi kesalahan saat menyiapkan permintaan: ${error.message}.`);
+          }
+        } else {
+          setError(`Gagal memuat data. Silakan coba lagi: ${error.message}.`);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [id]);
+  }, [id]); // Re-run effect if the warehouse ID in the URL changes
 
-  const formatDate = (date) => {
+  // Helper function to format date
+  const formatDate = (dateString) => {
     try {
-      return new Date(date).toLocaleDateString('id-ID', {
+      if (!dateString) return 'N/A';
+      return new Date(dateString).toLocaleDateString('id-ID', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
@@ -71,9 +117,11 @@ export default function DetailLahan() {
     }
   };
 
-  const formatDateTime = (date) => {
+  // Helper function to format date and time
+  const formatDateTime = (dateString) => {
     try {
-      return new Date(date).toLocaleString('id-ID', {
+      if (!dateString) return 'N/A';
+      return new Date(dateString).toLocaleString('id-ID', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -85,6 +133,7 @@ export default function DetailLahan() {
     }
   };
 
+  // Helper function to get crop emoji icon based on name
   const getCropIcon = (name) => {
     const lower = name.toLowerCase();
     if (lower.includes('bayam')) return '🥬';
@@ -97,21 +146,24 @@ export default function DetailLahan() {
     if (lower.includes('bawang')) return '🧅';
     if (lower.includes('kentang')) return '🥔';
     if (lower.includes('kacang')) return '🥜';
-    return '🌱';
+    if (lower.includes('selada')) return '🥬';
+    return '🌱'; // Default icon
   };
 
+  // Helper function to determine cycle status badge based on 'created_at' relative to today
   const getStatusBadge = (cycleDate) => {
     const today = new Date();
     const startDate = new Date(cycleDate);
-    const daysDiff = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
-    
+    const daysDiff = Math.floor((today - startDate) / (1000 * 60 * 60 * 24)); // Difference in days
+
     if (daysDiff < 0) return <span className="badge bg-secondary">Belum Dimulai</span>;
-    if (daysDiff < 30) return <span className="badge bg-success">Baru Tanam</span>;
-    if (daysDiff < 60) return <span className="badge bg-warning">Pertumbuhan</span>;
-    if (daysDiff < 90) return <span className="badge bg-info">Mendekati Panen</span>;
-    return <span className="badge bg-primary">Siap Panen</span>;
+    if (daysDiff < 30) return <span className="badge bg-success">Baru Tanam</span>; // 0-29 days
+    if (daysDiff < 60) return <span className="badge bg-warning">Pertumbuhan</span>; // 30-59 days
+    if (daysDiff < 90) return <span className="badge bg-info">Mendekati Panen</span>; // 60-89 days
+    return <span className="badge bg-primary">Siap Panen</span>; // 90+ days
   };
 
+  // Loading state rendering
   if (loading) {
     return (
       <div style={{ backgroundColor: '#EAF2EA', minHeight: '100vh' }}>
@@ -127,15 +179,17 @@ export default function DetailLahan() {
     );
   }
 
-  if (error || !warehouse || !user) {
+  // Error or data not found state rendering
+  if (error || !warehouse || !user) { // Ensure user data is also available to avoid undefined access
     return (
       <div style={{ backgroundColor: '#EAF2EA', minHeight: '100vh' }}>
         <Navbar />
         <div className="container py-5">
           <div className="alert alert-danger text-center" role="alert">
             <h4 className="alert-heading">Oops! Terjadi Kesalahan</h4>
-            <p>{error || 'Data tidak ditemukan'}</p>
+            <p>{error || 'Data lahan atau petani tidak ditemukan.'}</p>
             <Link to="/petani" className="btn btn-outline-danger">
+              <i className="bi bi-arrow-left me-2"></i>
               Kembali ke Daftar Petani
             </Link>
           </div>
@@ -189,6 +243,7 @@ export default function DetailLahan() {
               Petani
             </Link>
             <span className="mx-2">/</span>
+            {/* Link to farmer's detail page */}
             <Link
               to={`/petani/${user?.id}`}
               style={{
@@ -199,7 +254,7 @@ export default function DetailLahan() {
               onMouseEnter={() => setHoverUser(true)}
               onMouseLeave={() => setHoverUser(false)}
             >
-              {user?.name}
+              {user?.name || 'Petani'}
             </Link>
             <span className="mx-2">/</span>
             <span>{warehouse.name}</span>
@@ -214,22 +269,24 @@ export default function DetailLahan() {
             <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
               <div className="card-body p-0">
                 {/* Main Image */}
-                {mainImage && (
+                {mainImage ? (
                   <div className="position-relative">
-                    <img
-                      src={`http://localhost:3001/${mainImage}`}
-                      alt="Foto Utama Lahan"
-                      className="w-100 cursor-pointer"
-                      style={{ 
-                        height: '400px', 
-                        objectFit: 'cover',
-                        cursor: 'pointer'
-                      }}
-                      onClick={() => setImageModalOpen(true)}
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
-                    />
+<img
+  src={mainImage ? `http://localhost:3001/${mainImage}` : warehousePlaceholder}
+  alt="Foto Utama Lahan"
+  className="w-100"
+  style={{ 
+    height: '400px', 
+    objectFit: 'cover',
+    cursor: 'pointer' // Indicate clickability
+  }}
+  onClick={() => setImageModalOpen(true)}
+  onError={(e) => {
+    e.target.onerror = null; // Prevent infinite loop
+    e.target.src = warehousePlaceholder;
+  }}
+/>
+
                     <div className="position-absolute top-0 end-0 m-3">
                       <button 
                         className="btn btn-dark btn-sm rounded-pill"
@@ -239,6 +296,11 @@ export default function DetailLahan() {
                       </button>
                     </div>
                   </div>
+                ) : (
+                    <div className="text-center py-5 bg-light-subtle text-muted">
+                        <i className="bi bi-image display-1 mb-3"></i>
+                        <h5>Tidak ada foto utama tersedia</h5>
+                    </div>
                 )}
 
                 {/* Thumbnails */}
@@ -273,7 +335,7 @@ export default function DetailLahan() {
                             }
                           }}
                           onError={(e) => {
-                            e.target.style.display = 'none';
+                            e.target.style.display = 'none'; // Hide if image fails to load
                           }}
                         />
                       ))}
@@ -343,7 +405,7 @@ export default function DetailLahan() {
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h4 className="text-success fw-bold mb-0">
               <i className="bi bi-grid-3x3-gap me-2"></i>
-              Daftar Lahan ({fields.length})
+              Daftar Lahan ({fields.length}) {/* Refers to sub-fields within the warehouse */}
             </h4>
           </div>
 
@@ -351,8 +413,8 @@ export default function DetailLahan() {
             <div className="text-center py-5">
               <div className="text-muted">
                 <i className="bi bi-inbox display-1 d-block mb-3 text-muted"></i>
-                <h5>Belum ada lahan yang terdaftar</h5>
-                <p>Warehouse ini belum memiliki lahan yang terdaftar.</p>
+                <h5>Belum ada sub-lahan yang terdaftar</h5>
+                <p>Lahan utama ini belum memiliki sub-lahan terdaftar.</p>
               </div>
             </div>
           ) : (
@@ -363,7 +425,7 @@ export default function DetailLahan() {
                     <div className="card-body p-4">
                       <div className="text-center mb-3">
                         <span style={{ fontSize: '3rem' }}>
-                          {getCropIcon(field.name)}
+                          {getCropIcon(field.name)} {/* Assuming field name implies a crop type */}
                         </span>
                       </div>
                       <h5 className="text-success fw-bold text-center mb-3">
@@ -417,6 +479,7 @@ export default function DetailLahan() {
                       <th className="border-0 fw-bold">Lahan</th>
                       <th className="border-0 fw-bold">Mulai Tanam</th>
                       <th className="border-0 fw-bold">Status</th>
+                      <th className="border-0 fw-bold">Tahap Saat Ini</th>
                       <th className="border-0 fw-bold">Aksi</th>
                     </tr>
                   </thead>
@@ -442,7 +505,7 @@ export default function DetailLahan() {
                         </td>
                         <td className="align-middle">
                           <span className="badge bg-light text-dark">
-                            {cycle.field_name || 'Lahan tidak diketahui'}
+                            {cycle.field_name}
                           </span>
                         </td>
                         <td className="align-middle">
@@ -452,6 +515,11 @@ export default function DetailLahan() {
                         </td>
                         <td className="align-middle">
                           {getStatusBadge(cycle.created_at)}
+                        </td>
+                         <td className="align-middle">
+                            <span className="badge bg-secondary">
+                                {cycle.current_stage_name}
+                            </span>
                         </td>
                         <td className="align-middle">
                           <div className="d-flex gap-2">
@@ -468,6 +536,7 @@ export default function DetailLahan() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="btn btn-sm btn-outline-success"
+                                title="Lihat Lokasi Siklus"
                               >
                                 <i className="bi bi-geo-alt"></i>
                               </a>
@@ -501,7 +570,7 @@ export default function DetailLahan() {
         <div 
           className="modal fade show d-block" 
           style={{ backgroundColor: 'rgba(0,0,0,0.9)' }}
-          onClick={() => setImageModalOpen(false)}
+          onClick={() => setImageModalOpen(false)} // Close modal when clicking outside content
         >
           <div className="modal-dialog modal-xl modal-dialog-centered">
             <div className="modal-content bg-transparent border-0">
@@ -510,6 +579,7 @@ export default function DetailLahan() {
                   type="button"
                   className="btn-close btn-close-white"
                   onClick={() => setImageModalOpen(false)}
+                  aria-label="Close"
                 ></button>
               </div>
               <div className="modal-body text-center">
