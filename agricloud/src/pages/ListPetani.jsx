@@ -3,7 +3,7 @@ import axios from 'axios';
 import backgroundImg from '../assets/breadcrumb.png';
 import Navbar from '../components/Layout/Navbar';
 import Footer from '../components/Layout/Footer';
-import maxProfilePlaceholder from '../assets/max.png'; // Add this line
+import maxProfilePlaceholder from '../assets/max.png';
 import { Link } from 'react-router-dom';
 
 export default function ListPetani() {
@@ -19,10 +19,15 @@ export default function ListPetani() {
       try {
         setLoading(true);
         setError(null);
-        const res = await axios.get('http://localhost:3001/user');
-        setData(res.data);
+        const res = await axios.get('http://127.0.0.1:8000/api/farmers', {
+          // Jika endpoint membutuhkan token, tambahkan di sini:
+          // headers: {
+          //   Authorization: `Bearer ${yourToken}`
+          // }
+        });
+        setData(res.data.data);
       } catch (err) {
-        console.error("Gagal mengambil data user:", err);
+        console.error("Gagal mengambil data petani:", err);
         setError('Gagal memuat data. Silakan coba lagi.');
       } finally {
         setLoading(false);
@@ -39,7 +44,6 @@ export default function ListPetani() {
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const start = (page - 1) * itemsPerPage;
   const currentData = filtered.slice(start, start + itemsPerPage);
-
   const [hover, setHover] = useState(false);
 
   const formatDateTime = (date) => {
@@ -96,14 +100,10 @@ export default function ListPetani() {
 
       {/* Hero Section */}
       <section
-        className="text-white text-center position-relative d-flex align-items-center justify-content-center"
+className="text-white text-center position-relative d-flex align-items-center justify-content-center text-white text-center py-5"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${backgroundImg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed',
-          minHeight: '350px',
-        }}
+          backgroundImage: `url(${backgroundImg})`, backgroundSize: 'cover', backgroundPosition: 'center'
+        }}  
       >
         <div className="position-relative z-1 container">
           <h1 className="display-4 mb-4 mt-5 fw-bold">Daftar Petani</h1>
@@ -127,7 +127,7 @@ export default function ListPetani() {
       </section>
 
       <div className="container py-5">
-        {/* Header Section */}
+        {/* Header */}
         <div className="row mb-5">
           <div className="col-12">
             <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
@@ -154,7 +154,7 @@ export default function ListPetani() {
           </div>
         </div>
 
-        {/* Search Bar */}
+        {/* Search */}
         <div className="row mb-4">
           <div className="col-12">
             <div className="card shadow-sm border-0 rounded-4">
@@ -185,7 +185,7 @@ export default function ListPetani() {
           </div>
         </div>
 
-        {/* Content */}
+        {/* Petani Cards */}
         {filtered.length === 0 ? (
           <div className="text-center py-5">
             <div className="text-muted">
@@ -196,7 +196,6 @@ export default function ListPetani() {
           </div>
         ) : (
           <>
-            {/* User Cards */}
             <div className="row g-4 mb-5">
               {currentData.map((user) => (
                 <div key={user.id} className="col-lg-4 col-md-6">
@@ -206,31 +205,30 @@ export default function ListPetani() {
                   >
                     <div className="card h-100 shadow-sm border-0 rounded-4 overflow-hidden position-relative">
                       <div className="position-relative">
-                            <img
-      src={
-        user.profile_photo_url && user.profile_photo_url.trim() !== ''
-          ? `http://localhost:3001/${user.profile_photo_url}`
-          : maxProfilePlaceholder
-      }
-      alt={user.name}
-      className="card-img-top"
-      style={{
-        height: '240px',
-        objectFit: 'cover',
-        transition: 'all 0.3s ease'
-      }}
-      onError={(e) => {
-        e.target.onerror = null; // Hindari infinite loop jika fallback juga gagal
-        e.target.src = maxProfilePlaceholder;
-      }}
-      onMouseOver={(e) => {
-        e.target.style.transform = 'scale(1.05)';
-      }}
-      onMouseOut={(e) => {
-        e.target.style.transform = 'scale(1)';
-      }}
-    />
-
+                        <img
+                          src={
+                            user.profile_photo_url && user.profile_photo_url.trim() !== ''
+                              ? `http://127.0.0.1:8000/storage/${user.profile_photo_url}`
+                              : maxProfilePlaceholder
+                          }
+                          alt={user.name}
+                          className="card-img-top"
+                          style={{
+                            height: '240px',
+                            objectFit: 'cover',
+                            transition: 'all 0.3s ease'
+                          }}
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = maxProfilePlaceholder;
+                          }}
+                          onMouseOver={(e) => {
+                            e.target.style.transform = 'scale(1.05)';
+                          }}
+                          onMouseOut={(e) => {
+                            e.target.style.transform = 'scale(1)';
+                          }}
+                        />
                         <div className="position-absolute top-0 end-0 m-3">
                           <div className="badge bg-success rounded-pill px-3 py-2">
                             <i className="bi bi-patch-check me-1"></i>
@@ -238,7 +236,7 @@ export default function ListPetani() {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="card-body p-4">
                         <div className="text-center mb-3">
                           <h5 className="card-title fw-bold text-success mb-2">
@@ -278,7 +276,7 @@ export default function ListPetani() {
                         </div>
                       </div>
 
-                      {/* Hover Effect Overlay */}
+                      {/* Hover Overlay */}
                       <div 
                         className="position-absolute w-100 h-100 d-flex align-items-center justify-content-center"
                         style={{

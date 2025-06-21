@@ -19,39 +19,30 @@ export default function DetailPetani() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageModalOpen, setImageModalOpen] = useState(false);
 
-  useEffect(() => {
-const fetchDetail = async () => {
-  try {
-    setLoading(true);
-    setError(null);
+useEffect(() => {
+  const fetchDetail = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-    const [userRes, warehouseRes] = await Promise.all([
-      axios.get(`http://localhost:3001/user/${id}`),
-      axios.get(`http://localhost:3001/farmerwarehouse`)
-    ]);
+      const [userRes, fieldRes] = await Promise.all([
+        axios.get(`http://127.0.0.1:8000/api/farmers/${id}`),
+        axios.get(`http://127.0.0.1:8000/api/farmers/${id}/fields`)
+      ]);
 
-    const selectedUser = userRes.data;
-    if (!selectedUser) {
-      setError('Petani tidak ditemukan');
-      return;
+      setUser(userRes.data.data); // asumsi response langsung berupa user object
+      setWarehouses(fieldRes.data.data); // asumsi response langsung berupa array lahan
+    } catch (error) {
+      console.error("Gagal mengambil data:", error);
+      setError('Gagal memuat data. Silakan coba lagi.');
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const userWarehouses = warehouseRes.data.filter(w => String(w.userId) === String(selectedUser.id));
+  fetchDetail();
+}, [id]);
 
-
-    setUser(selectedUser);
-    setWarehouses(userWarehouses);
-  } catch (error) {
-    console.error("Gagal mengambil data:", error);
-    setError('Gagal memuat data. Silakan coba lagi.');
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-    fetchDetail();
-  }, [id]);
 
   const formatDateTime = (date) => {
     try {
@@ -116,13 +107,9 @@ const fetchDetail = async () => {
 
       {/* Breadcrumb Section */}
       <section
-        className="text-white text-center position-relative d-flex align-items-center justify-content-center"
+        className="text-white text-center position-relative d-flex align-items-center justify-content-center text-white text-center py-5"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${backgroundImg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed',
-          minHeight: '350px',
+          backgroundImage: `url(${backgroundImg})`, backgroundSize: 'cover', backgroundPosition: 'center'
         }}
       >
         <div className="position-relative z-1 container">

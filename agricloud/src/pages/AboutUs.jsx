@@ -5,11 +5,11 @@ import { Link } from 'react-router-dom';
 import logo from '../assets/logoagri.png';
 import layananImg from '../assets/petanigarap.png';
 import joinImg from '../assets/bergabung.png';
-import team1 from '../assets/max.png';
-import team2 from '../assets/dira.jpg';
+import team1 from '../assets/dewi.jpg';
+import team2 from '../assets/nadira.jpg';
 import team3 from '../assets/max.png';
-import team4 from '../assets/max.png';
-import team5 from '../assets/max.png';
+import team4 from '../assets/fatih.png';
+import team5 from '../assets/emir.jpg';
 import Traktor from '../assets/traktor.png';
 import backgroundImg from '../assets/breadcrumb.png';
 import Navbar from '../components/Layout/Navbar';
@@ -19,9 +19,9 @@ export default function AboutUs() {
   const teamMembers = [
     { img: team1, name: "Dewi Nuraini", position: "UI/UX Designer", expertise: "User Experience Design" },
     { img: team2, name: "Nadira Aulia Dewi", position: "UI/UX - Frontend Developer", expertise: "Frontend Development" },
-    { img: team3, name: "Mu'az Mu'az", position: "Project Manager", expertise: "Project Management" },
+    { img: team3, name: "Mu'adz Mu'adz", position: "Backend Developer", expertise: "System Architecture" },
     { img: team4, name: "Muhammad Fatih", position: "Frontend Developer", expertise: "Web Development" },
-    { img: team5, name: "Muhammad Yassir", position: "Backend Developer", expertise: "System Architecture" },
+    { img: team5, name: "Muhammad Yassir", position: "Onion Boy", expertise: "Onion Boy" },
   ];
 
   const services = [
@@ -43,7 +43,7 @@ export default function AboutUs() {
       icon: FaWarehouse,
       title: "Smart Warehouse Management",
       subtitle: "Optimalisasi Stok & Distribusi",
-      description: "Sistem manajemen gudang berbasis cloud yang mengintegrasikan inventaris, tracking otomatis, dan analisis prediktif untuk efisiensi maksimal dalam pengelolaan stok hasil pertanian.",
+      description: "Sistem manajemen berbasis cloud yang mengintegrasikan inventaris, tracking otomatis, dan analisis prediktif untuk efisiensi maksimal dalam pengelolaan stok hasil pertanian.",
       features: ["Cloud Integration", "Auto Tracking", "Predictive Analytics"]
     }
   ];
@@ -99,13 +99,9 @@ export default function AboutUs() {
 
       {/* Hero - Breadcrumb Section */}
       <section
-        className="text-white text-center position-relative d-flex align-items-center justify-content-center"
+className="text-white text-center position-relative d-flex align-items-center justify-content-center text-white text-center py-5"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${backgroundImg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed',
-          minHeight: '350px',
+          backgroundImage: `url(${backgroundImg})`, backgroundSize: 'cover', backgroundPosition: 'center'
         }}
       >
         <div className="position-relative z-1 container">
