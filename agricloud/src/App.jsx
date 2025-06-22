@@ -9,7 +9,7 @@ import AboutUs from './pages/AboutUs';
 import ListPetani from './pages/ListPetani';
 import DetailPetani from './pages/DetailPetani';
 import DetailLahan from './pages/DetailLahan'; // Pastikan file ini ada
-import DetailSiklus from './pages/DetailSiklus';
+// import DetailSiklus from './pages/DetailSiklus';
 
 function App() {
   return (
@@ -20,7 +20,7 @@ function App() {
         <Route path="/petani" element={<ListPetani />} />
         <Route path="/petani/:id" element={<DetailPetani />} />
         <Route path="/lahan/:id" element={<DetailLahan />} />
-        <Route path="/cycle/:id" element={<DetailSiklus />} /> {/* Ganti dengan komponen yang sesuai */}
+        {/* <Route path="/cycles/:id" element={<DetailSiklus />} />  */}
         {/* Tambahkan route lain jika perlu */}
       </Routes>
     </Router>
